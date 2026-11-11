@@ -3,8 +3,11 @@
 - clifpy: in a uv project, `uv add clifpy "polars<2"` (clifpy 2.1 breaks on polars 2.x).
   For quick scripts outside a project, use /opt/clif/venv/bin/python (clifpy preinstalled).
 - R: use uvr (uvr init, uvr add, uvr sync, uvr run). Never install.packages().
-- Synthetic CLIF data (no PHI) is at $CLIF_SYNTH_DATA (clif_*.parquet).
-  That bundled 10k dataset is CLIF 2.1 (mixed-case categories, e.g. IMV, High Flow NC).
+- Synthetic CLIF data (no PHI, 10k hospitalizations, clif_*.parquet), one dir per version:
+  CLIF 3.0: $CLIF_SYNTH_DATA_V3_0 (36 tables; lowercase codes, e.g. imv, hfnc)
+  CLIF 2.1: $CLIF_SYNTH_DATA_V2_1 (28 tables; mixed case, e.g. IMV, High Flow NC)
+  $CLIF_SYNTH_DATA points at the 3.0 data. Test every script against both.
+- clifpy reads both: pass clif_version="3.0" or "2.1" to from_file().
 - Never use real patient data in this environment.
 
 ## CLIF version tolerance (default for all scripts)

@@ -3,9 +3,11 @@
 A ready-made [Claude Code cloud environment](https://code.claude.com/docs/en/claude-code-on-the-web)
 for CLIF (Common Longitudinal ICU data Format) research. Every new cloud session starts with:
 
-- **Synthetic CLIF data**: the 10,000-hospitalization dataset from
+- **Synthetic CLIF data in both versions**: the 10,000-hospitalization datasets from the
   [synthetic_clif](https://github.com/Common-Longitudinal-ICU-data-Format/synthetic_clif)
-  at `/opt/clif/synthetic_clif/synth_clif_10k` (CLIF 2.1, parquet, no PHI).
+  v0.8.0 release (parquet, no PHI):
+  - CLIF 3.0 at `/opt/clif/synth_clif_10k_v3.0` (36 tables)
+  - CLIF 2.1 at `/opt/clif/synth_clif_10k_v2.1` (28 tables)
 - **Python with uv**, plus [clifpy](https://pypi.org/project/clifpy/) preinstalled in `/opt/clif/venv`.
 - **R with [uvr](https://github.com/nbafrank/uvr)** (v0.4.8) and R 4.5.2. Packages install
   from Posit Package Manager's prebuilt Linux binaries, so they take seconds instead of compiling.
@@ -33,16 +35,18 @@ for CLIF (Common Longitudinal ICU data Format) research. Every new cloud session
    some (such as arrow) fail.
 3. **Environment variables:** add
    ```
-   CLIF_SYNTH_DATA=/opt/clif/synthetic_clif/synth_clif_10k
+   CLIF_SYNTH_DATA=/opt/clif/synth_clif_10k_v3.0
+   CLIF_SYNTH_DATA_V3_0=/opt/clif/synth_clif_10k_v3.0
+   CLIF_SYNTH_DATA_V2_1=/opt/clif/synth_clif_10k_v2.1
    ```
 4. **Setup script:** paste the whole of [`setup.sh`](setup.sh).
 5. Save, then start a new session on this environment. Check it worked:
    ```bash
-   uvr --version && ls $CLIF_SYNTH_DATA | head -3 && /opt/clif/venv/bin/python -c "import clifpy; print(clifpy.__version__)"
+   uvr --version && ls $CLIF_SYNTH_DATA_V3_0 | wc -l && ls $CLIF_SYNTH_DATA_V2_1 | wc -l && /opt/clif/venv/bin/python -c "import clifpy; print(clifpy.__version__)"
    ```
    The `clif-icu` skill should also show up in the session's skills list.
 
-The setup script runs each time a fresh session container starts and adds about 1-2 minutes.
+The setup script runs each time a fresh session container starts and usually adds under 2 minutes.
 If it fails, the session won't start. Fix it under the environment's Edit → Setup script.
 
 ## Use the conventions in a study repo
@@ -69,12 +73,15 @@ root of a study repository:
 - **uvr v0.4.8:** the installer's "latest version" lookup uses the GitHub API, which cloud
   sessions can't reach, so the version is pinned. To upgrade, change `UVR_VERSION` in `setup.sh`.
 - **R 4.5.2:** change it in `setup.sh` to upgrade.
+- **synthetic_clif v0.8.0:** change the release tag in `setup.sh` to pick up newer data.
 - **`polars<2`:** clifpy 2.1 calls a polars option that polars 2.x removed. Without the pin,
   clifpy warns and falls back to DuckDB. Drop the pin once clifpy supports polars 2.
 
 ## Notes
 
-- **CLIF version of the data:** the bundled 10k dataset is CLIF 2.1. For CLIF 3.0 test data,
-  generate it with the synthetic_clif generator, which outputs 3.0 by default.
+- **Testing both CLIF versions:** run scripts against both data folders. clifpy reads either
+  one when you pass `clif_version="3.0"` or `"2.1"` to `from_file()`. clifpy's validator
+  reports errors on both datasets, including "High Missingness" in some synthetic columns,
+  so treat its output as information, not a pass/fail gate.
 - **No real patient data:** this environment is for agent-assisted development on synthetic
   data only. Run on real data yourself, in your own secure environment, with no agent present.

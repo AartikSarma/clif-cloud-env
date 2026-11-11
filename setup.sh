@@ -1,11 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 
-# 1. Synthetic CLIF data (10k hospitalizations, parquet) -> /opt/clif
-mkdir -p /opt/clif
-if [ ! -d /opt/clif/synthetic_clif ]; then
-  git clone --depth 1 -q https://github.com/Common-Longitudinal-ICU-data-Format/synthetic_clif /opt/clif/synthetic_clif
-fi
+# 1. Synthetic CLIF data (10k hospitalizations, parquet), CLIF 3.0 and 2.1,
+#    from a pinned synthetic_clif release -> /opt/clif/synth_clif_10k_v{3.0,2.1}
+SC=https://github.com/Common-Longitudinal-ICU-data-Format/synthetic_clif/releases/download/v0.8.0
+for pair in "3.0:synth_clif_10k.tar.gz" "2.1:synth_clif_10k_clif2.1.tar.gz"; do
+  d="/opt/clif/synth_clif_10k_v${pair%%:*}"
+  if [ ! -f "$d/clif_hospitalization.parquet" ]; then
+    mkdir -p "$d"
+    curl -fsSL "$SC/${pair#*:}" | tar -xz -C "$d"
+  fi
+done
 
 # 2. uvr (R package manager), pinned version, checksum-verified installer
 curl -fsSL https://raw.githubusercontent.com/nbafrank/uvr/main/install.sh -o /tmp/uvr_install.sh
@@ -37,8 +42,11 @@ cat >> "$HOME/.claude/CLAUDE.md" <<'EOF'
 - clifpy: in a uv project, `uv add clifpy "polars<2"` (clifpy 2.1 breaks on polars 2.x).
   For quick scripts outside a project, use /opt/clif/venv/bin/python (clifpy preinstalled).
 - R: use uvr (uvr init, uvr add, uvr sync, uvr run). Never install.packages().
-- Synthetic CLIF data (no PHI) is at $CLIF_SYNTH_DATA (clif_*.parquet).
-  That bundled 10k dataset is CLIF 2.1 (mixed-case categories, e.g. IMV, High Flow NC).
+- Synthetic CLIF data (no PHI, 10k hospitalizations, clif_*.parquet), one dir per version:
+  CLIF 3.0: $CLIF_SYNTH_DATA_V3_0 (36 tables; lowercase codes, e.g. imv, hfnc)
+  CLIF 2.1: $CLIF_SYNTH_DATA_V2_1 (28 tables; mixed case, e.g. IMV, High Flow NC)
+  $CLIF_SYNTH_DATA points at the 3.0 data. Test every script against both.
+- clifpy reads both: pass clif_version="3.0" or "2.1" to from_file().
 - Never use real patient data in this environment.
 
 ## CLIF version tolerance (default for all scripts)
