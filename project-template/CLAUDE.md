@@ -2,6 +2,13 @@
 - Python: use uv (uv add, uv run). Never pip install. clifpy: `uv add clifpy "polars<2"`.
 - R: use uvr (uvr add, uvr sync, uvr run). Never install.packages().
 - Develop against synthetic CLIF data only; never real patient data in an agent session.
+- Synthetic data: the synthetic_clif release has a 10k-hospitalization dataset per version
+  (https://github.com/Common-Longitudinal-ICU-data-Format/synthetic_clif/releases):
+  CLIF 3.0 in synth_clif_10k.tar.gz (36 tables; lowercase codes, e.g. imv, hfnc),
+  CLIF 2.1 in synth_clif_10k_clif2.1.tar.gz (28 tables; mixed case, e.g. IMV, High Flow NC).
+  Read the folders from CLIF_SYNTH_DATA_V3_0 / CLIF_SYNTH_DATA_V2_1 (set in the CLIF cloud
+  environment; set them yourself elsewhere). Never hard-code the paths.
+- Test every script against both datasets. clifpy reads either: from_file(..., clif_version="3.0" or "2.1").
 
 ## CLIF version tolerance (default for all scripts)
 - Unless the user or project declares otherwise, the declared target is BOTH
