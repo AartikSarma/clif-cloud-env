@@ -1,0 +1,22 @@
+name: clifkit tests
+
+on:
+  push:
+    branches: [clifkit]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: clifkit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run --group dev pytest -v
