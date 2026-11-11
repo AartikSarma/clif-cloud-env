@@ -1,0 +1,20 @@
+[project]
+name = "clifkit"
+version = "0.1.0"
+description = "Site config, PHI-safe output folders and a one-command runner for CLIF analyses"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+pandas = ["pandas>=2.0"]
+
+[project.scripts]
+clifkit = "clifkit.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
