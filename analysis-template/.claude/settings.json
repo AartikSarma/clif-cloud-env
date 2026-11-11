@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "clif-skills": {
+      "source": {
+        "source": "github",
+        "repo": "Common-Longitudinal-ICU-data-Format/skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "clif-icu@clif-skills": true
+  }
+}

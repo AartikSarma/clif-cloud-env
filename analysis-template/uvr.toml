@@ -1,0 +1,7 @@
+[project]
+name = "clif-example-imv"
+r_version = "4.5.2"
+
+[dependencies]
+arrow = "*"
+dplyr = "*"

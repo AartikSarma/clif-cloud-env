@@ -1,0 +1,9 @@
+/.uvr/library/
+/.uvr/activate*
+.venv/
+__pycache__/
+# Data and outputs never live in the repo
+*.parquet
+*.feather
+*.rds
+CLIF_output/

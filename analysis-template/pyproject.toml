@@ -1,0 +1,21 @@
+[project]
+name = "clif-example-imv"
+version = "0.1.0"
+description = "Example CLIF analysis: invasive mechanical ventilation by age group and discharge category"
+requires-python = ">=3.11"
+dependencies = [
+    "clifkit",
+    "pandas>=2.2",
+    "pyarrow>=15",
+]
+
+[tool.uv.sources]
+clifkit = { git = "https://github.com/AartikSarma/clif-cloud-env", branch = "clifkit", subdirectory = "clifkit" }
+
+# Steps run in this order by `uv run run.py`. .py steps use this project's Python;
+# .R steps run with `uvr run` using the packages locked in uvr.lock.
+[tool.clifkit]
+steps = [
+    "analysis/01_cohort.py",
+    "analysis/02_discharge.R",
+]

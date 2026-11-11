@@ -1,0 +1,97 @@
+name: analysis-template on synthetic CLIF
+
+# Runs the template's single command (`uv run run.py --synthetic <version>`) on
+# Windows, macOS and Linux for both CLIF versions, then checks every run released
+# the same shareable tables.
+
+on:
+  push:
+    branches: [analysis-template]
+  workflow_dispatch:
+
+env:
+  UVR_VERSION: v0.4.8
+  R_VERSION: 4.5.2
+  SYNTH_RELEASE: https://github.com/Common-Longitudinal-ICU-data-Format/synthetic_clif/releases/download/v0.8.0
+
+jobs:
+  run:
+    name: ${{ matrix.os }} / CLIF ${{ matrix.clif }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        clif: ["3.0", "2.1"]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: analysis-template
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install uvr (macOS, Linux)
+        if: runner.os != 'Windows'
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/nbafrank/uvr/main/install.sh | UVR_INSTALL_DIR="$HOME/.local/bin" sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install uvr (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:UVR_INSTALL_DIR = "$env:USERPROFILE\.local\bin"
+          irm https://raw.githubusercontent.com/nbafrank/uvr/main/install.ps1 | iex
+          "$env:USERPROFILE\.local\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Install R with uvr
+        run: uvr r install "$R_VERSION" --unattended
+
+      - name: Download synthetic CLIF ${{ matrix.clif }}
+        working-directory: ${{ runner.temp }}
+        run: |
+          if [ "${{ matrix.clif }}" = "3.0" ]; then f=synth_clif_10k.tar.gz; else f=synth_clif_10k_clif2.1.tar.gz; fi
+          mkdir -p synth && cd synth
+          curl -fsSL "$SYNTH_RELEASE/$f" | tar -xz
+          ls | head -3
+
+      - name: Run the analysis (one command)
+        env:
+          CLIF_SYNTH_DATA_V3_0: ${{ runner.temp }}/synth
+          CLIF_SYNTH_DATA_V2_1: ${{ runner.temp }}/synth
+          CLIF_OUTPUT_ROOT: ${{ runner.temp }}/CLIF_output
+        run: uv run run.py --synthetic ${{ matrix.clif }}
+
+      - name: Check outputs
+        working-directory: ${{ runner.temp }}/CLIF_output/clif-example-imv__synthetic_v${{ matrix.clif }}
+        run: |
+          ls -R .
+          test -f upload_no_phi/manifest.json
+          test -f upload_no_phi/imv_by_age_group.csv
+          test -f upload_no_phi/discharge_by_imv.csv
+          test -f local_only_phi/cohort.parquet
+          grep -q '<10' upload_no_phi/discharge_by_imv.csv
+          if ls upload_no_phi | grep -vE '\.(csv|json)$'; then echo "unexpected file in upload_no_phi"; exit 1; fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: upload_no_phi-${{ matrix.os }}-clif${{ matrix.clif }}
+          path: ${{ runner.temp }}/CLIF_output/clif-example-imv__synthetic_v${{ matrix.clif }}/upload_no_phi
+
+  same-results:
+    name: identical tables across OS and CLIF version
+    needs: run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: results
+      - run: |
+          ref=results/upload_no_phi-ubuntu-latest-clif3.0
+          for d in results/*/; do
+            for f in imv_by_age_group.csv discharge_by_imv.csv; do
+              diff --strip-trailing-cr "$ref/$f" "$d/$f" && echo "same: $d$f"
+            done
+          done
