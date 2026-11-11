@@ -165,8 +165,8 @@ def test_claude_rule_paths(path, rule):
 
 
 def test_init_site_writes_config_and_deny_rules(monkeypatch, tmp_path):
-    from clifkit.cli import main
-    monkeypatch.setenv("HOME", str(tmp_path))
+    from clifkit.cli import claude_rule_path, main
+    monkeypatch.setattr(Path, "home", lambda: tmp_path)
     monkeypatch.setenv("CLIF_SITE_CONFIG", str(tmp_path / "cfg" / "site.toml"))
     data = tmp_path / "data"; data.mkdir()
     settings = tmp_path / ".claude" / "settings.json"
@@ -181,7 +181,7 @@ def test_init_site_writes_config_and_deny_rules(monkeypatch, tmp_path):
     s = json.loads(settings.read_text())
     assert s["model"] == "x"
     assert s["permissions"]["deny"] == [
-        "Read(//etc/**)", f"Read(/{data}/**)", f"Edit(/{data}/**)",
+        "Read(//etc/**)", f"Read({claude_rule_path(f'{data}/**')})", f"Edit({claude_rule_path(f'{data}/**')})",
         "Read(~/CLIF_output/**/local_only_phi/**)", "Edit(~/CLIF_output/**/local_only_phi/**)",
     ]
     # running it again doesn't duplicate rules or overwrite the config without --force
