@@ -1,0 +1,6 @@
+cran.r-project.org
+cloud.r-project.org
+packagemanager.posit.co
+cdn.posit.co
+bioconductor.org
+rspm-sync.rstudio.com
