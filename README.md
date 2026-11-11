@@ -61,7 +61,7 @@ root of a study repository:
 |------|------------|
 | `setup.sh` | The cloud environment setup script. Self-contained, safe to run more than once. |
 | `allowed-hosts.txt` | Hosts the environment must allow (R, CRAN, Posit, Bioconductor). |
-| `CLAUDE.md` | The defaults that `setup.sh` writes to `~/.claude/CLAUDE.md`. Keep it in sync with `setup.sh`. |
+| `environment-CLAUDE.md` | A readable copy of the defaults that `setup.sh` writes to `~/.claude/CLAUDE.md`. Keep it in sync with `setup.sh`. (Named so Claude Code doesn't load it as instructions for working on this repo.) |
 | `project-template/` | The portable `CLAUDE.md` and plugin settings for study repos. |
 
 ## Pinned versions
