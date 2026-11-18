@@ -58,6 +58,19 @@ root of a study repository:
 - `CLAUDE.md`: the uv/uvr, CLIF 2.1/3.0 and cross-platform rules, without the cloud-only paths.
 - `.claude/settings.json`: turns on the `clif-icu` plugin for anyone who opens the repo in
   Claude Code, on a laptop or in the cloud.
+- `SOP.md`: the local project standard operating procedure. Data zones, the four data
+  standards, setup steps and a checklist for moving from synthetic to local data.
+- `config/config_template.json`: the consortium config with three extra keys,
+  `intermediate_directory`, `results_directory` and `min_cell_size`.
+- `utils/clif_paths.py` and `utils/clif_paths.R`: load the config, keep intermediates and
+  results outside the repo, refuse intermediates with dates, geography or identifiers,
+  and check small cells before release.
+- `.gitignore` and `.pre-commit-config.yaml`: keep data files and the site config out of git.
+
+For a new study, create the repo from the consortium
+[CLIF-Project-Template](https://github.com/Common-Longitudinal-ICU-data-Format/CLIF-Project-Template),
+copy `project-template/` over its root (its config template and `.gitignore` are supersets of
+the consortium's), then run `pre-commit install`. `SOP.md` has the rest.
 
 ## Files
 
@@ -66,7 +79,7 @@ root of a study repository:
 | `setup.sh` | The cloud environment setup script. Self-contained, safe to run more than once. |
 | `allowed-hosts.txt` | Hosts the environment must allow (R, CRAN, Posit, Bioconductor). |
 | `environment-CLAUDE.md` | A readable copy of the defaults that `setup.sh` writes to `~/.claude/CLAUDE.md`. Keep it in sync with `setup.sh`. (Named so Claude Code doesn't load it as instructions for working on this repo.) |
-| `project-template/` | The portable `CLAUDE.md` and plugin settings for study repos. |
+| `project-template/` | The portable `CLAUDE.md`, plugin settings, SOP, config template, path helpers and commit checks for study repos. |
 
 ## Pinned versions
 
