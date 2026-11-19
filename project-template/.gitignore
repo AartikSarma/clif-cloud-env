@@ -1,0 +1,47 @@
+# --- From the CLIF-Project-Template .gitignore ---
+.Rprofile
+.Rhistory
+.Ruserdata
+.DS_Store
+*.Rproj
+.Rproj.user
+initialize_renv.R
+*.RData
+clif_*.parquet
+clif_*.csv
+clif_*.fst
+!clif_demo/*.parquet
+output/intermediate_phi/*
+!output/intermediate_phi/README.md
+
+# --- Local data-zone standards (see SOP.md) ---
+# Site config holds local paths; only config_template.json is committed.
+config/config.json
+
+# No data files in the repo, whatever their name. Results go to results_directory,
+# outside the repo; only reviewed aggregates are copied to output/final_no_phi/.
+*.parquet
+*.feather
+*.arrow
+*.fst
+*.csv
+*.tsv
+*.xlsx
+*.rds
+*.rda
+*.pkl
+*.pickle
+*.h5
+*.dcm
+*.nii
+*.nii.gz
+*.edf
+*.wfdb
+logs/
+!clif_demo/*.parquet
+!output/final_no_phi/*.csv
+
+# Python and R tooling
+__pycache__/
+.venv/
+.ipynb_checkpoints/

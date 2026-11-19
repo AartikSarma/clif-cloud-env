@@ -33,3 +33,19 @@
 - Parallelism: guard Python multiprocessing with if __name__ == "__main__";
   in R avoid fork-only workers (use PSOCK / future::multisession).
 - Report an OS as tested only if scripts actually ran there; otherwise say "reviewed".
+
+## Data zones (see SOP.md)
+- Get every path from `config/config.json` through `utils/clif_paths` (`load_config()`
+  in Python, `source(file.path("utils", "clif_paths.R"))` in R). Never hard-code a path.
+- Read core CLIF tables in place from `data_directory`; never copy, subset-and-save or
+  write anything into it.
+- Never write data into the repo. Intermediates go through `write_intermediate()` to
+  `intermediate_directory`; results go through `write_result()` to `results_directory`.
+  Both default to `../clif_workspace/<repo>/`, outside the repo.
+- Keep PHI out of intermediates: compute in memory, then write offsets from an index
+  time (`to_offsets()`), not dates; drop geography and identifiers; top-code age at 90
+  (`top_code_age()`). Don't pass `allow=` to get past the check unless the user agrees,
+  and record the reason in the README.
+- Don't call `release_result()` or add files to `output/final_no_phi/`; release is a
+  human step after review.
+- Call `write_manifest()` at the end of every analysis entry point.
